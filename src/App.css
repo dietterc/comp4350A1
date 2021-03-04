@@ -1,0 +1,51 @@
+.App {
+  text-align: center;
+}
+
+body {
+  background-color: #282c34;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  color: white;
+}
+
+.App-footer {
+  background-color: #282c34;
+  color: white;
+}
+
+.input-box {
+  border: 2px solid white;
+  font-size: 25px;
+  color: white;
+  background-color: #282c34;
+  width: 50%;
+  padding: 10px 25px;
+}
+
+.s-button {
+  background-color: #282c34;
+  border: 2px solid white;
+  color: White;
+  padding: 10px 25px;
+  font-size: 25px;
+  margin: 4px 2px;
+  transition: 0.1s;
+}
+
+.s-button:hover {
+  background-color: #21242a;
+}

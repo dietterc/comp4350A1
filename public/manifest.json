@@ -1,0 +1,10 @@
+{
+  "short_name": "comp4350 A1",
+  "name": "COMP4350 Assignment 1",
+  "icons": [
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
