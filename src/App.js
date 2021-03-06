@@ -6,11 +6,16 @@ class App extends React.Component {
     super(props);
     this.state = {
       tag: '',
-      submitted: false
+      data_newest: null,
+      data_most_voted: null,
+      output: '',
+      submitted: false,
+      fetched: false
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    //this.output = this.output.bind(this);
   }
 
   handleChange(event) {
@@ -18,12 +23,58 @@ class App extends React.Component {
   }
 
   handleSubmit(event) {
-    
-    //pull data from api here
-
     this.setState({submitted: !this.state.submitted});
+    if(this.state.submitted == false) {
+      this.setState({fetched: false});
+      this.setState({data_newest: null});
+      this.setState({data_most_voted: null});
+    }
     event.preventDefault();
   }
+
+  output(event) {
+    if(this.state.fetched == false) {
+      this.setState({fetched: true});
+      //pull data from api here
+      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=creation&tagged=java&site=stackoverflow')
+          .then(response => response.json())
+          .then(data => this.setState({data_newest: data}));
+      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=votes&tagged=java&site=stackoverflow')
+          .then(response => response.json())
+          .then(data => this.setState({data_most_voted: data}));
+      
+    }
+    else {
+      if(this.state.data_newest != null && this.state.data_most_voted != null) {
+        if(this.state.output == '') {
+          console.log(this.state.data_newest)
+          console.log(this.state.data_most_voted)
+          let out = ''
+          let newestList = []
+          let votedList = []
+
+          for(var i=0;i<10;i++) {
+            newestList.push(this.state.data_newest[i]);
+            votedList.push(this.state.data_most_voted[i]);
+          }
+          
+          for(var i=0;i<votedList.length;i++) {
+
+            out += votedList["title"]
+            
+            if(i != votedList.length - 1) {
+              out += "\n"
+            }
+          }
+
+          out = out.split('\n').map(str => <div >{str}</div>) //test
+        
+          this.setState({output: out});
+        }
+      }
+    }
+  }
+
 
   handleState() {
     if(this.state.submitted == false) {
@@ -41,7 +92,11 @@ class App extends React.Component {
     else { //state for displaying results
       return (
         <form onSubmit={this.handleSubmit} >
-          {this.state.tag}
+          Results for tag: {this.state.tag},
+          <br/>
+          <br/>
+          {this.output()}
+          {this.state.output}
           <br/>
           <br/>
           <input type="submit" value="Return to search" className="r-button"/>
