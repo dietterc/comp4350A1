@@ -1,5 +1,33 @@
 import './App.css';
 import React from 'react';
+import Collapsible from 'react-collapsible';
+
+class Question {
+  constructor(title, creationDate, votes, body, answers, comments) {
+    this.title = title
+    this.creationDate = creationDate
+    this.votes = votes
+    this.body = body
+    this.answers = answers
+    this.comments = comments
+  }
+}
+
+class Answer {
+  constructor(body, creationDate) {
+    this.body = body
+    this.creationDate = creationDate
+  }
+}
+
+const questionStyle = {
+  border: '2px solid white',
+  color: 'White',
+  padding: '10px 25px',
+  fontSize: '14px',
+  margin: '4px 2px',
+  transition: '0.1s'
+};
 
 class App extends React.Component {
   constructor(props) {
@@ -8,7 +36,7 @@ class App extends React.Component {
       tag: '',
       data_newest: null,
       data_most_voted: null,
-      output: '',
+      output: 'Loading results...',
       submitted: false,
       fetched: false
     };
@@ -25,9 +53,11 @@ class App extends React.Component {
   handleSubmit(event) {
     this.setState({submitted: !this.state.submitted});
     if(this.state.submitted == false) {
+      //set everything back to default
       this.setState({fetched: false});
       this.setState({data_newest: null});
       this.setState({data_most_voted: null});
+      this.setState({output: 'Loading results...'});
     }
     event.preventDefault();
   }
@@ -36,40 +66,115 @@ class App extends React.Component {
     if(this.state.fetched == false) {
       this.setState({fetched: true});
       //pull data from api here
-      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=creation&tagged=java&site=stackoverflow')
+      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=creation&tagged='+ this.state.tag + '&site=stackoverflow&filter=!*zyy10AUddTdUFFiZ0lV0b0lzlOk4saHXIFT(Uxdl)BfTeL3xarQSC0P2I')
           .then(response => response.json())
           .then(data => this.setState({data_newest: data}));
-      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=votes&tagged=java&site=stackoverflow')
+
+      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=votes&tagged='+ this.state.tag + '&site=stackoverflow&filter=!*zyy10AUddTdUFFiZ0lV0b0lzlOk4saHXIFT(Uxdl)BfTeL3xarQSC0P2I')
           .then(response => response.json())
           .then(data => this.setState({data_most_voted: data}));
+
       
     }
     else {
       if(this.state.data_newest != null && this.state.data_most_voted != null) {
-        if(this.state.output == '') {
+        if(this.state.output == 'Loading results...') {
           console.log(this.state.data_newest)
-          console.log(this.state.data_most_voted)
+          //console.log(this.state.data_most_voted)
+          
           let out = ''
-          let newestList = []
-          let votedList = []
+          let outList = []
 
-          for(var i=0;i<10;i++) {
-            newestList.push(this.state.data_newest[i]);
-            votedList.push(this.state.data_most_voted[i]);
+          for(var i=0;i<10 && i<this.state.data_newest.items.length;i++) {
+            let question = this.state.data_newest.items[i]
+            let title = question.title
+            let body = question.body_markdown
+            let date = new Date(question.creation_date * 1000)
+            let votes = question.score
+            let answers = []
+            let comments = []
+
+            for(let j=0;j<question.answer_count;j++) {
+              answers.push(new Answer(question.answers[j].body,question.answers[j].creation_date))
+            }
+            for(let j=0;j<question.comment_count;j++) {
+              answers.push(new Answer(question.comments[j].body,question.comments[j].creation_date))
+            }
+            
+            outList.push(new Question(title, date, votes, body, answers, comments));
+            
+          }
+
+          for(var i=0;i<10 && i<this.state.data_most_voted.items.length;i++) {
+            let question = this.state.data_most_voted.items[i]
+            let title = question.title
+            let body = question.body_markdown
+            let date = new Date(question.creation_date * 1000)
+            let votes = question.score
+            let answers = []
+            let comments = []
+
+            for(let j=0;j<question.answer_count;j++) {
+              answers.push(new Answer(question.answers[j].body,question.answers[j].creation_date))
+            }
+            for(let j=0;j<question.comment_count;j++) {
+              answers.push(new Answer(question.comments[j].body,question.comments[j].creation_date))
+            }
+            
+            outList.push(new Question(title, date, votes, body, answers, comments));
+            
+          }
+
+          //sort the list 
+          outList.sort(function(a, b){return b.creationDate.getTime() - a.creationDate.getTime();});
+
+          //add question stlying, has to be here because its a string
+          out += `
+          <style>
+          .question {
+            text-align: left; 
+            border: 2px solid white; 
+            border-radius: 10px; 
+            color: White; 
+            padding: 5px 5px; 
+            font-size: 14px; 
+            margin: 10px 2px;
+          }
+          .question:hover {
+            background-color: #21242a;
+          }
+          .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            
+          }
+
+
+          </style>
+          `
+          
+          for(var i=0;i<outList.length;i++) {
+
+            //out += newestList[i].title
+            //console.log(newestList[i].title)
+            out += "<Collapsible trigger='Start here'>"
+            out += "<div type='button' class='question'>"
+            out += "<b>Title:</b> " + outList[i].title
+            out += "<br/><b>Score:</b> " + outList[i].votes 
+            out += "<br/><b>Creation Date:</b> " + outList[i].creationDate 
+
+            out += '</div>' 
+            out += "</Collapsible >"
           }
           
-          for(var i=0;i<votedList.length;i++) {
-
-            out += votedList["title"]
-            
-            if(i != votedList.length - 1) {
-              out += "\n"
-            }
+          if(out == '') {
+            this.setState({output: "No results found."});
+          }
+          else {
+            this.setState({output: out});
           }
 
-          out = out.split('\n').map(str => <div >{str}</div>) //test
-        
-          this.setState({output: out});
         }
       }
     }
@@ -92,14 +197,18 @@ class App extends React.Component {
     else { //state for displaying results
       return (
         <form onSubmit={this.handleSubmit} >
-          Results for tag: {this.state.tag},
+          Results for tag: {this.state.tag}
           <br/>
           <br/>
           {this.output()}
-          {this.state.output}
+          <div
+            dangerouslySetInnerHTML={{
+            __html: this.state.output}} >
+          </div>
+
           <br/>
           <br/>
-          <input type="submit" value="Return to search" className="r-button"/>
+          <input type="submit" value="Return to search" className="s-button"/>
         </form>
       );
     }
