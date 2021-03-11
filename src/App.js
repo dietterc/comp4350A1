@@ -1,7 +1,6 @@
 import './App.css';
 import React from 'react';
 import Collapsible from 'react-collapsible';
-import ReactMarkdown from 'react-markdown'
 
 const newest = require('./newest.json')
 const voted = require('./voted.json')
@@ -14,18 +13,29 @@ class Question {
     this.body = body
     this.answers = answers
     this.comments = comments
-    //this.commentList = []
   }
 
   getCommentHTML() {
     var list = []
+    let lb = (<br/>);
     for(let i=0;i<this.comments.length;i++) {
       var content = this.comments[i].get_content()
       if(content != undefined) {
-        //console.log(this.title)
-        //console.log(this.comments)
         list.push(content)
-      //console.log(typeof this.comments[i].get_content())
+        list.push(lb)
+      }
+    }
+    return list
+  }
+
+  getAnswerHTML() {
+    var list = []
+    let lb = (<br/>);
+    for(let i=0;i<this.answers.length;i++) {
+      var content = this.answers[i].get_content()
+      if(content != undefined) {
+        list.push(content)
+        list.push(lb)
       }
     }
     return list
@@ -40,50 +50,66 @@ class Question {
       </div>
     );
 
-    let commentHTML = this.getCommentHTML()
-
     return (
       <Collapsible trigger={defaultView}>
         <div className="q-hidden">
           Body:<br/>
-          <ReactMarkdown className="q-body">
-            {this.body + ""}
-          </ReactMarkdown>
-          <br/>Comments:<br/>
-          
-            {commentHTML}
-
+          <div className="q-body" dangerouslySetInnerHTML={{__html: this.body + ""}} />
+          <br/>Comments: {this.comments.length}<br/>
+            {this.getCommentHTML()}
+          <br/>Answers: {this.answers.length}<br/>
+            {this.getAnswerHTML()}
         </div>
       </Collapsible>
     );
   }
 }
 
-class Answer {
-  constructor(body, creationDate, votes) {
+class Subtext {
+  constructor(body, creationDate, votes, comments) {
     this.body = body
-    this.creationDate = creationDate
+    this.creationDate = new Date(creationDate * 1000)
     this.votes = votes
+    this.comments = comments
+  }
+
+  getCommentHTML() {
+    var list = []
+    let lb = (<br/>);
+    for(let i=0;i<this.comments.length;i++) {
+      var content = this.comments[i].get_content()
+      if(content != undefined) {
+        list.push(content)
+        list.push(lb)
+      }
+    }
+    return list
   }
 
   get_content() {
-    return (
-      <div>
-        {this.body + ""}
-      </div>
-    );
+    if(this.comments == null || this.comments.length == 0) {
+      return (
+        <div className="subtext" >
+          <div><b>Score: </b>{this.votes + ""}<div className = "st-date"> <b>Posted at: </b>{this.creationDate + ""}</div> <hr className="st-hr"/> </div>
+          <div dangerouslySetInnerHTML={{__html: this.body + ""}}/>
+        </div>
+      );
+    }
+    else {
+      return (
+        <div className="subtext" >
+          <div><b>Score: </b>{this.votes + ""}<div className = "st-date"> <b>Posted at: </b>{this.creationDate + ""}</div> <hr className="st-hr"/> </div>
+          <div dangerouslySetInnerHTML={{__html: this.body + ""}}/>
+          <br/>Comments:<br/>
+            {this.getCommentHTML()}
+        </div>
+      );
+    }
   }
 
 }
 
-const questionStyle = {
-  border: '2px solid white',
-  color: 'White',
-  padding: '10px 25px',
-  fontSize: '14px',
-  margin: '4px 2px',
-  transition: '0.1s'
-};
+
 
 class App extends React.Component {
   constructor(props) {
@@ -153,17 +179,24 @@ class App extends React.Component {
           for(var i=0;i<10 && i<this.state.data_newest.items.length;i++) {
             let question = this.state.data_newest.items[i]
             let title = question.title
-            let body = question.body_markdown
+            let body = question.body
             let date = new Date(question.creation_date * 1000)
             let votes = question.score
             let answers = []
             let comments = []
 
             for(let j=0;j<question.answer_count;j++) {
-              answers.push(new Answer(question.answers[j].body,question.answers[j].creation_date,question.answers[j].score))
+              let answerComments = []
+
+              for(let k=0;k<question.answers[j].comment_count;k++) {
+                answerComments.push(new Subtext(question.answers[j].comments[k].body,question.answers[j].comments[k].creation_date,question.answers[j].comments[k].score,null))
+              }
+
+              answers.push(new Subtext(question.answers[j].body,question.answers[j].creation_date,question.answers[j].score,answerComments))
             }
+            
             for(let j=0;j<question.comment_count;j++) {
-              comments.push(new Answer(question.comments[j].body,question.comments[j].creation_date,question.comments[j].score))
+              comments.push(new Subtext(question.comments[j].body,question.comments[j].creation_date,question.comments[j].score,null))
             }
             
             outList.push(new Question(title, date, votes, body, answers, comments));
@@ -173,17 +206,25 @@ class App extends React.Component {
           for(var i=0;i<10 && i<this.state.data_most_voted.items.length;i++) {
             let question = this.state.data_most_voted.items[i]
             let title = question.title
-            let body = question.body_markdown
+            let body = question.body
             let date = new Date(question.creation_date * 1000)
             let votes = question.score
             let answers = []
             let comments = []
 
             for(let j=0;j<question.answer_count;j++) {
-              answers.push(new Answer(question.answers[j].body,question.answers[j].creation_date,question.answers[j].score))
+              let answerComments = []
+
+              for(let k=0;k<question.answers[j].comment_count;k++) {
+                answerComments.push(new Subtext(question.answers[j].comments[k].body,question.answers[j].comments[k].creation_date,question.answers[j].comments[k].score,null))
+              }
+
+              answers.push(new Subtext(question.answers[j].body,question.answers[j].creation_date,question.answers[j].score,answerComments))
             }
+            
+
             for(let j=0;j<question.comment_count;j++) {
-              comments.push(new Answer(question.comments[j].body,question.comments[j].creation_date,question.comments[j].score))
+              comments.push(new Subtext(question.comments[j].body,question.comments[j].creation_date,question.comments[j].score,null))
             }
             
             outList.push(new Question(title, date, votes, body, answers, comments));

@@ -70,8 +70,8 @@ body {
   text-align: left;
   padding-left: 10px;
   padding-right: 10px;
-  border: 1px solid grey; 
-  float: left;
+  border: 1px solid #576070; 
+  display: inline-block;
   margin-left: 15px;
   margin-right: 15px;
   margin-top: 10px;
@@ -88,5 +88,30 @@ body {
   margin-left: 5px;
   margin-right: 5px;
 
+}
+
+.subtext {
+  font-size: 13px; 
+  text-align: left;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 1px solid #576070; 
+  display: inline-block;
+  margin-left: 30px;
+  margin-right: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  max-width: 600px;
+}
+
+.st-date {
+  text-align: left;
+  float: right;
+  margin-left: 30px;
+}
+
+.st-hr {
+  border: 1px solid #576070;
+  border-bottom: 0ch;
 }
 
