@@ -166,12 +166,15 @@ class App extends React.Component {
     if(this.state.fetched == false) {
       this.setState({fetched: true});
       //pull data from api here
+      let currentTime = new Date().now() / 1000
+      let fromDate = currentTime - 604800
+
       /*
-      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=creation&tagged='+ this.state.tag + '&site=stackoverflow&filter=!*zyy10AUddTdUFFiZ0lV0b0lzlOk4saHXIFT(Uxdl)BfTeL3xarQSC0P2I')
+      fetch('https://api.stackexchange.com/2.2/search?fromdate=' + fromDate + '&order=desc&sort=creation&tagged='+ this.state.tag + '&site=stackoverflow&filter=!)c9AAUVI7)rYQm3.Y9nh)(A.wRr(tZjhjN4UbS9yz49_D')
           .then(response => response.json())
           .then(data => this.setState({data_newest: data}));
 
-      fetch('https://api.stackexchange.com/2.2/search?order=desc&sort=votes&tagged='+ this.state.tag + '&site=stackoverflow&filter=!*zyy10AUddTdUFFiZ0lV0b0lzlOk4saHXIFT(Uxdl)BfTeL3xarQSC0P2I')
+      fetch('https://api.stackexchange.com/2.2/search?fromdate=' + fromDate + '&order=desc&sort=votes&tagged='+ this.state.tag + '&site=stackoverflow&filter=!)c9AAUVI7)rYQm3.Y9nh)(A.wRr(tZjhjN4UbS9yz49_D')
           .then(response => response.json())
           .then(data => this.setState({data_most_voted: data}));
       */
