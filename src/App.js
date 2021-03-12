@@ -2,9 +2,6 @@ import './App.css';
 import React from 'react';
 import Collapsible from 'react-collapsible';
 
-//TEMP remove after
-const newest = require('./newest.json')
-const voted = require('./voted.json')
 
 //Question class 
 //stores all relevant data for Questions pulled from the api
@@ -156,6 +153,7 @@ class App extends React.Component {
       this.setState({fetched: false});
       this.setState({data_newest: null});
       this.setState({data_most_voted: null});
+      this.setState({outputList: []});
       this.setState({output: 'Loading results...'});
     }
     event.preventDefault();
@@ -163,13 +161,15 @@ class App extends React.Component {
 
   //get data from the api, format it, then display it on the screen.
   output(event) {
-    if(this.state.fetched == false) {
+    if(this.state.fetched == false && this.state.tag != '') {
       this.setState({fetched: true});
       //pull data from api here
-      let currentTime = new Date().now() / 1000
+
+      //get the unix time from one week ago
+      let currentTime = Math.floor(Date.now() / 1000)
       let fromDate = currentTime - 604800
 
-      /*
+      
       fetch('https://api.stackexchange.com/2.2/search?fromdate=' + fromDate + '&order=desc&sort=creation&tagged='+ this.state.tag + '&site=stackoverflow&filter=!)c9AAUVI7)rYQm3.Y9nh)(A.wRr(tZjhjN4UbS9yz49_D')
           .then(response => response.json())
           .then(data => this.setState({data_newest: data}));
@@ -177,16 +177,16 @@ class App extends React.Component {
       fetch('https://api.stackexchange.com/2.2/search?fromdate=' + fromDate + '&order=desc&sort=votes&tagged='+ this.state.tag + '&site=stackoverflow&filter=!)c9AAUVI7)rYQm3.Y9nh)(A.wRr(tZjhjN4UbS9yz49_D')
           .then(response => response.json())
           .then(data => this.setState({data_most_voted: data}));
-      */
+      
 
-      //TEMP
-      this.setState({data_newest: newest})
-      this.setState({data_most_voted: voted})
 
     }
     else {
       if(this.state.data_newest != null && this.state.data_most_voted != null) {
         if(this.state.output == 'Loading results...') {
+
+          console.log(this.state.data_newest)
+          console.log(this.state.data_most_voted)
           //if we have all the data and are ready to display
 
           let out = ''
