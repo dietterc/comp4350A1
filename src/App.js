@@ -2,9 +2,12 @@ import './App.css';
 import React from 'react';
 import Collapsible from 'react-collapsible';
 
+//TEMP remove after
 const newest = require('./newest.json')
 const voted = require('./voted.json')
 
+//Question class 
+//stores all relevant data for Questions pulled from the api
 class Question {
   constructor(title, creationDate, votes, body, answers, comments) {
     this.title = title
@@ -15,11 +18,13 @@ class Question {
     this.comments = comments
   }
 
+  //get the html (JSX) for each comment
+  //add them all to a list then return that list
   getCommentHTML() {
     var list = []
     let lb = (<br/>);
     for(let i=0;i<this.comments.length;i++) {
-      var content = this.comments[i].get_content()
+      var content = this.comments[i].get_html()
       if(content != undefined) {
         list.push(content)
         list.push(lb)
@@ -28,11 +33,13 @@ class Question {
     return list
   }
 
+  //get the html (JSX) for each answer
+  //add them all to a list then return that list
   getAnswerHTML() {
     var list = []
     let lb = (<br/>);
     for(let i=0;i<this.answers.length;i++) {
-      var content = this.answers[i].get_content()
+      var content = this.answers[i].get_html()
       if(content != undefined) {
         list.push(content)
         list.push(lb)
@@ -41,6 +48,7 @@ class Question {
     return list
   }
 
+  //return formatted HTML for this question object
   get_html() {
     let defaultView = (
       <div className="question">
@@ -65,6 +73,8 @@ class Question {
   }
 }
 
+//Subtext class for storing answers and comments 
+//if comments == null, then this is holing a comment since comments cant have comments
 class Subtext {
   constructor(body, creationDate, votes, comments) {
     this.body = body
@@ -73,11 +83,12 @@ class Subtext {
     this.comments = comments
   }
 
+  //if this is an answer get that answers comments 
   getCommentHTML() {
     var list = []
     let lb = (<br/>);
     for(let i=0;i<this.comments.length;i++) {
-      var content = this.comments[i].get_content()
+      var content = this.comments[i].get_html()
       if(content != undefined) {
         list.push(content)
         list.push(lb)
@@ -86,8 +97,10 @@ class Subtext {
     return list
   }
 
-  get_content() {
+  //return the html for this subtext, either a comment or an answer
+  get_html() {
     if(this.comments == null || this.comments.length == 0) {
+      //this is an answer with at least 1 comment
       return (
         <div className="subtext" >
           <div><b>Score: </b>{this.votes + ""}<div className = "st-date"> <b>Posted at: </b>{this.creationDate + ""}</div> <hr className="st-hr"/> </div>
@@ -96,6 +109,7 @@ class Subtext {
       );
     }
     else {
+      //this is a comment or answer with no comments
       return (
         <div className="subtext" >
           <div><b>Score: </b>{this.votes + ""}<div className = "st-date"> <b>Posted at: </b>{this.creationDate + ""}</div> <hr className="st-hr"/> </div>
@@ -109,11 +123,11 @@ class Subtext {
 
 }
 
-
-
+//react class that renders the screen/handles states
 class App extends React.Component {
   constructor(props) {
     super(props);
+    //states for storing the fetched data, the displayed data, and to tell if we have fetched data or not.
     this.state = {
       tag: '',
       data_newest: null,
@@ -129,6 +143,7 @@ class App extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  //handle user input
   handleChange(event) {
     this.setState({tag: event.target.value});
   }
@@ -136,17 +151,17 @@ class App extends React.Component {
   handleSubmit(event) {
     this.setState({submitted: !this.state.submitted});
     if(this.state.submitted == false) {
+
       //set everything back to default
       this.setState({fetched: false});
       this.setState({data_newest: null});
       this.setState({data_most_voted: null});
       this.setState({output: 'Loading results...'});
-     
-
     }
     event.preventDefault();
   }
 
+  //get data from the api, format it, then display it on the screen.
   output(event) {
     if(this.state.fetched == false) {
       this.setState({fetched: true});
@@ -160,9 +175,8 @@ class App extends React.Component {
           .then(response => response.json())
           .then(data => this.setState({data_most_voted: data}));
       */
-      //ignoring for now
-      console.log(newest)
-      console.log(voted)
+
+      //TEMP
       this.setState({data_newest: newest})
       this.setState({data_most_voted: voted})
 
@@ -170,12 +184,12 @@ class App extends React.Component {
     else {
       if(this.state.data_newest != null && this.state.data_most_voted != null) {
         if(this.state.output == 'Loading results...') {
-          //console.log(this.state.data_newest)
-          //console.log(this.state.data_most_voted)
-          
+          //if we have all the data and are ready to display
+
           let out = ''
           let outList = []
 
+          //get the 10 newest questions
           for(var i=0;i<10 && i<this.state.data_newest.items.length;i++) {
             let question = this.state.data_newest.items[i]
             let title = question.title
@@ -185,24 +199,25 @@ class App extends React.Component {
             let answers = []
             let comments = []
 
+            //get comments/answers for each question 
             for(let j=0;j<question.answer_count;j++) {
               let answerComments = []
 
               for(let k=0;k<question.answers[j].comment_count;k++) {
                 answerComments.push(new Subtext(question.answers[j].comments[k].body,question.answers[j].comments[k].creation_date,question.answers[j].comments[k].score,null))
               }
-
               answers.push(new Subtext(question.answers[j].body,question.answers[j].creation_date,question.answers[j].score,answerComments))
             }
             
             for(let j=0;j<question.comment_count;j++) {
               comments.push(new Subtext(question.comments[j].body,question.comments[j].creation_date,question.comments[j].score,null))
             }
-            
+            //add the question to the master list
             outList.push(new Question(title, date, votes, body, answers, comments));
             
           }
           
+          //get the 10 most voted questions (in the past week)
           for(var i=0;i<10 && i<this.state.data_most_voted.items.length;i++) {
             let question = this.state.data_most_voted.items[i]
             let title = question.title
@@ -212,21 +227,19 @@ class App extends React.Component {
             let answers = []
             let comments = []
 
+            //get comments/answers for each question 
             for(let j=0;j<question.answer_count;j++) {
               let answerComments = []
-
               for(let k=0;k<question.answers[j].comment_count;k++) {
                 answerComments.push(new Subtext(question.answers[j].comments[k].body,question.answers[j].comments[k].creation_date,question.answers[j].comments[k].score,null))
               }
-
               answers.push(new Subtext(question.answers[j].body,question.answers[j].creation_date,question.answers[j].score,answerComments))
             }
             
-
             for(let j=0;j<question.comment_count;j++) {
               comments.push(new Subtext(question.comments[j].body,question.comments[j].creation_date,question.comments[j].score,null))
             }
-            
+            //add the question to the master list
             outList.push(new Question(title, date, votes, body, answers, comments));
             
           }
@@ -250,6 +263,7 @@ class App extends React.Component {
               htmlOutput.push(outList[i].get_html())
             }
 
+            //set the html list to this state which is then displayed on the screen
             this.setState({outputList: htmlOutput});
           }
 
@@ -258,7 +272,7 @@ class App extends React.Component {
     }
   }
 
-
+  //render certain html based on what state we are in, (home page vs results page)
   handleState() {
     if(this.state.submitted == false) {
       return (
@@ -292,6 +306,7 @@ class App extends React.Component {
     }
   }
 
+  //render the screen
   render() {
       return (
         <div className="App">
@@ -306,4 +321,5 @@ class App extends React.Component {
   }
 }
 
+//run the app
 export default App;
