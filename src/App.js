@@ -22,7 +22,7 @@ class Question {
     let lb = (<br/>);
     for(let i=0;i<this.comments.length;i++) {
       var content = this.comments[i].get_html()
-      if(content != undefined) {
+      if(content !== undefined) {
         list.push(content)
         list.push(lb)
       }
@@ -37,7 +37,7 @@ class Question {
     let lb = (<br/>);
     for(let i=0;i<this.answers.length;i++) {
       var content = this.answers[i].get_html()
-      if(content != undefined) {
+      if(content !== undefined) {
         list.push(content)
         list.push(lb)
       }
@@ -86,7 +86,7 @@ class Subtext {
     let lb = (<br/>);
     for(let i=0;i<this.comments.length;i++) {
       var content = this.comments[i].get_html()
-      if(content != undefined) {
+      if(content !== undefined) {
         list.push(content)
         list.push(lb)
       }
@@ -96,7 +96,7 @@ class Subtext {
 
   //return the html for this subtext, either a comment or an answer
   get_html() {
-    if(this.comments == null || this.comments.length == 0) {
+    if(this.comments === null || this.comments.length === 0) {
       //this is an answer with at least 1 comment
       return (
         <div className="subtext" >
@@ -147,7 +147,7 @@ class App extends React.Component {
 
   handleSubmit(event) {
     this.setState({submitted: !this.state.submitted});
-    if(this.state.submitted == false) {
+    if(this.state.submitted === false) {
 
       //set everything back to default
       this.setState({fetched: false});
@@ -161,7 +161,7 @@ class App extends React.Component {
 
   //get data from the api, format it, then display it on the screen.
   output(event) {
-    if(this.state.fetched == false && this.state.tag != '') {
+    if(this.state.fetched === false && this.state.tag !== '') {
       this.setState({fetched: true});
       //pull data from api here
 
@@ -182,18 +182,16 @@ class App extends React.Component {
 
     }
     else {
-      if(this.state.data_newest != null && this.state.data_most_voted != null) {
-        if(this.state.output == 'Loading results...') {
+      if(this.state.data_newest !== null && this.state.data_most_voted !== null) {
+        if(this.state.output === 'Loading results...') {
 
-          console.log(this.state.data_newest)
-          console.log(this.state.data_most_voted)
           //if we have all the data and are ready to display
 
           let out = ''
           let outList = []
 
           //get the 10 newest questions
-          for(var i=0;i<10 && i<this.state.data_newest.items.length;i++) {
+          for(let i=0;i<10 && i<this.state.data_newest.items.length;i++) {
             let question = this.state.data_newest.items[i]
             let title = question.title
             let body = question.body
@@ -221,7 +219,7 @@ class App extends React.Component {
           }
           
           //get the 10 most voted questions (in the past week)
-          for(var i=0;i<10 && i<this.state.data_most_voted.items.length;i++) {
+          for(let i=0;i<10 && i<this.state.data_most_voted.items.length;i++) {
             let question = this.state.data_most_voted.items[i]
             let title = question.title
             let body = question.body
@@ -254,7 +252,7 @@ class App extends React.Component {
             out += (this.state.data_newest.items.length + this.state.data_most_voted.items.length) + " results found, displaying the first 20"
           }
           
-          if(out == '') {
+          if(out === '') {
             this.setState({output: "No results found."});
           }
           else {
@@ -277,7 +275,7 @@ class App extends React.Component {
 
   //render certain html based on what state we are in, (home page vs results page)
   handleState() {
-    if(this.state.submitted == false) {
+    if(this.state.submitted === false) {
       return (
         <form onSubmit={this.handleSubmit} >
           <label >
